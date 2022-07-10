@@ -1,26 +1,68 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import { extractLocations, getEvents } from "./api";
+import "./App.css";
+import CitySearch from "./CitySearch";
+import EventList from "./EventList";
+import "./nprogress.css";
+import NumberOfEvents from "./NumberOfEvents";
+import { OfflineAlert } from './Alert';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  state = {
+    events: [],
+    locations: [],
+    currentLocation: "Everywhere",
+    numberOfEvents: 32,
+  };
+
+  componentDidMount() {
+    this.mounted = true;
+    getEvents().then((events) => {
+      if (this.mounted) {
+        this.setState({ events, locations: extractLocations(events) });
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this.mounted = false;
+  }
+
+  updateEvents = (
+    location = this.state.currentLocation,
+    eventCount = this.state.numberOfEvents
+  ) => {
+    getEvents().then((events) => {
+      const locationEvents =
+        location === "Everywhere"
+          ? events
+          : events.filter((event) => event.location === location);
+
+      this.setState({
+        events: locationEvents.slice(0, eventCount),
+        currentLocation: location,
+      });
+    });
+  };
+
+  updateNumberOfEvents = (numberOfEvents) => {
+    this.setState({ numberOfEvents });
+    this.updateEvents(this.currentLocation, numberOfEvents);
+  };
+
+  render() {
+    return (
+      <div className='App'>
+        <CitySearch
+          locations={this.state.locations}
+          updateEvents={this.updateEvents}
+        />
+      <NumberOfEvents updateNumberOfEvents={this.updateNumberOfEvents} updateEvents={() => this.updateEvents()} />
+        <EventList events={this.state.events} />
+        {!navigator.onLine && <OfflineAlert text={'You are currently offline, data may be not updated.'}/>}
+      </div>
+    );
+  }
 }
 
 export default App;
