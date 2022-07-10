@@ -4,9 +4,14 @@ import { ErrorAlert } from './Alert';
 
 
 class NumberOfEvents extends Component {
-  state = { 
-    numberOfEvents : 1
-  }
+  constructor() {
+    super();
+    // stting the values for the default states
+    this.state = {
+        numberOfEvents: 32,
+        infoText: "",
+    };
+}
 
   changeNumOfEvents = (e) => {
     let newValue = parseInt(e.target.value);

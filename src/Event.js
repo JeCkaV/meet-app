@@ -2,70 +2,40 @@ import React, { Component } from "react";
 
 class Event extends Component {
   state = {
-    showDetails: false,
+    collapsed: true
   };
 
   render() {
-    const {
-      summary,
-      location,
-      start,
-      htmlLink,
-      description,
-    } = this.props.event;
-
-    const date = new Date(start.dateTime);
-    const options = {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    };
-    const eventStart = date.toLocaleString("en-US", options);
-
-    const { showDetails } = this.state;
+    const { event } = this.props;
+    const { collapsed } = this.state;
+    
     return (
-      <div className='event'>
-        <div className='event__Overview'>
-          <h2 className='event__Overview--name'>{summary}</h2>
-          <p className='event__Overview--localDate'>{`${eventStart}`}</p>
-          {location && (
-            <p className='event__Overview--venue'>
-              @{summary} | {location}
-            </p>
-          )}
-          {showDetails && (
-            <button
-              className='details-btn'
-              onClick={() => this.setState({ showDetails: !showDetails })}
-            >
-              hide details
-            </button>
-          )}
-
-          {!showDetails && (
-            <button
-              className='details-btn'
-              onClick={() => this.setState({ showDetails: !showDetails })}
-            >
-              show details
-            </button>
-          )}
-        </div>
-        {showDetails && (
-          <div className='event__Details'>
-            <h3>About event:</h3>
-            <h4>
-              <a href={htmlLink} target='_blank' rel='noopener noreferrer'>
-                See details on Google Calendar
-              </a>
-            </h4>
-            <p
-              className='event__Details--description'
-              dangerouslySetInnerHTML={{ __html: description }}
-            />
+      <div className="event">
+        <h1 className="summary">{event.summary}</h1>
+        <p className="start-date">
+          {event.start.dateTime} ({event.start.timeZone})
+        </p>
+        <p className="location">
+          @{event.summary} | {event.location}
+        </p>
+        <button
+          variant="outline-info"
+          className={`details-button ${collapsed ? "show" : "hide"}-details`}
+          onClick={this.handleClick}
+        >
+          {collapsed ? "Show Details" : "Hide Details"}
+        </button>
+        {!collapsed && (
+          <div
+            className={`extra-details ${
+              this.state.collapsed ? "hide" : "show"
+            }`}
+          >
+            <h3>About the event:</h3>
+            <a href={event.htmlLink} rel="noreferrer" target="_blank">
+              See details on Google Calendar
+            </a>
+            <p className="event-description">{event.description}</p>
           </div>
         )}
       </div>
